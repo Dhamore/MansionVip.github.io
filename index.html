@@ -1021,6 +1021,12 @@
                 <h2 class="text-xl font-semibold text-white/90 tracking-wide drop-shadow-sm">Mansión Plast C.A</h2>
             </div>
             
+            <!-- Diagnostic Information -->
+            <div id="diagnosticInfo" class="mb-6 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-xl text-yellow-100 text-sm hidden">
+                <h4 class="font-semibold mb-2">🔧 Información de Diagnóstico</h4>
+                <div id="diagnosticDetails"></div>
+            </div>
+            
             <form id="loginForm" class="space-y-6">
                 <div class="relative">
                     <label class="block text-white text-sm font-semibold mb-3">Usuario</label>
@@ -1049,15 +1055,34 @@
                     </div>
                 </div>
                 <div id="loginError" class="text-red-200 text-sm text-center hidden bg-red-500/20 p-3 rounded-xl"></div>
-                <button type="submit" 
-                        class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 rounded-2xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 font-semibold text-lg btn-modern shadow-lg transform hover:scale-[1.02] active:scale-[0.98] border border-white/10">
-                    <span class="flex items-center justify-center space-x-2">
-                        <span>Iniciar Sesión</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                        </svg>
-                    </span>
-                </button>
+                
+                <!-- Emergency Tools -->
+                <div class="flex flex-col space-y-2">
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 rounded-2xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 font-semibold text-lg btn-modern shadow-lg transform hover:scale-[1.02] active:scale-[0.98] border border-white/10">
+                        <span class="flex items-center justify-center space-x-2">
+                            <span>Iniciar Sesión</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                            </svg>
+                        </span>
+                    </button>
+                    
+                    <div class="flex space-x-2">
+                        <button type="button" onclick="showDiagnostics()" 
+                                class="flex-1 bg-yellow-600/80 text-white py-2 px-4 rounded-xl hover:bg-yellow-600 transition-all text-sm font-medium">
+                            🔧 Diagnóstico
+                        </button>
+                        <button type="button" onclick="fixLocalStorageCorruption()" 
+                                class="flex-1 bg-red-600/80 text-white py-2 px-4 rounded-xl hover:bg-red-600 transition-all text-sm font-medium">
+                            🚨 Reparar
+                        </button>
+                        <button type="button" onclick="resetSystemEmergency()" 
+                                class="flex-1 bg-purple-600/80 text-white py-2 px-4 rounded-xl hover:bg-purple-600 transition-all text-sm font-medium">
+                            ⚡ Reset
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -11442,10 +11467,320 @@
         // Final initialization call
         loadAdvancedFeatures();
 
+        // Emergency diagnostic and repair functions
+        function showDiagnostics() {
+            const diagnosticInfo = document.getElementById('diagnosticInfo');
+            const diagnosticDetails = document.getElementById('diagnosticDetails');
+            
+            if (!diagnosticInfo || !diagnosticDetails) {
+                alert('⚠️ Panel de diagnósticos no disponible en esta versión');
+                return;
+            }
+            
+            // Gather diagnostic information
+            const diagnostics = [];
+            
+            // Check localStorage availability
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                diagnostics.push('✅ LocalStorage: Disponible');
+            } catch (e) {
+                diagnostics.push('❌ LocalStorage: No disponible - ' + e.message);
+            }
+            
+            // Check current localStorage keys
+            const keys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                keys.push(localStorage.key(i));
+            }
+            diagnostics.push(`📦 Claves en LocalStorage: ${keys.length} (${keys.join(', ')})`);
+            
+            // Check users data
+            try {
+                const usersData = localStorage.getItem('users');
+                if (usersData) {
+                    const users = JSON.parse(usersData);
+                    diagnostics.push(`👥 Datos de usuarios: ${users.length} usuarios encontrados`);
+                } else {
+                    diagnostics.push('⚠️ Datos de usuarios: No encontrados');
+                }
+            } catch (e) {
+                diagnostics.push(`❌ Datos de usuarios: Corruptos - ${e.message}`);
+            }
+            
+            // Check browser info
+            diagnostics.push(`🌐 Navegador: ${navigator.userAgent.split(' ')[0]}`);
+            diagnostics.push(`🔒 Origen: ${window.location.origin}`);
+            
+            // Check date/time
+            diagnostics.push(`📅 Fecha actual: ${new Date().toLocaleString('es-ES')}`);
+            
+            diagnosticDetails.innerHTML = diagnostics.map(d => `<div>${d}</div>`).join('');
+            diagnosticInfo.classList.remove('hidden');
+        }
+        
+        function fixLocalStorageCorruption() {
+            try {
+                // Show confirmation
+                if (!confirm('¿Estás seguro de que quieres reparar el localStorage? Esto recreará los datos del sistema pero mantendrá las credenciales correctas.')) {
+                    return;
+                }
+                
+                // Clear potentially corrupted data but preserve backup if any
+                const backup = localStorage.getItem('systemBackup');
+                
+                // Clear corrupted data
+                localStorage.clear();
+                
+                // Restore backup if available
+                if (backup) {
+                    try {
+                        const backupData = JSON.parse(backup);
+                        Object.keys(backupData).forEach(key => {
+                            localStorage.setItem(key, JSON.stringify(backupData[key]));
+                        });
+                    } catch (e) {
+                        console.warn('Backup restoration failed:', e);
+                    }
+                }
+                
+                // Ensure user system is properly initialized
+                initializeUsers();
+                
+                // Initialize empty data structures if not restored from backup
+                if (!localStorage.getItem('transactions')) {
+                    localStorage.setItem('transactions', JSON.stringify([]));
+                }
+                if (!localStorage.getItem('providers')) {
+                    localStorage.setItem('providers', JSON.stringify([]));
+                }
+                if (!localStorage.getItem('paymentHistory')) {
+                    localStorage.setItem('paymentHistory', JSON.stringify([]));
+                }
+                if (!localStorage.getItem('exchangeRate')) {
+                    localStorage.setItem('exchangeRate', '36.50');
+                }
+                if (!localStorage.getItem('inventoryUSD')) {
+                    localStorage.setItem('inventoryUSD', '0');
+                }
+                if (!localStorage.getItem('inventoryVES')) {
+                    localStorage.setItem('inventoryVES', '0');
+                }
+                
+                // Log the repair action
+                const repairLog = {
+                    id: generateId(),
+                    action: 'EMERGENCY_REPAIR',
+                    details: 'LocalStorage corruption fixed and data structures recreated',
+                    user: 'system',
+                    timestamp: new Date().toISOString(),
+                    ipAddress: 'localhost'
+                };
+                
+                let logs = [];
+                try {
+                    const existingLogs = localStorage.getItem('actionLogs');
+                    if (existingLogs) {
+                        logs = JSON.parse(existingLogs);
+                    }
+                } catch (e) {
+                    // Ignore corrupted logs
+                }
+                
+                logs.push(repairLog);
+                localStorage.setItem('actionLogs', JSON.stringify(logs));
+                
+                alert('✅ Reparación completada exitosamente.\n\nCredenciales correctas:\nUsuario: admin\nContraseña: master2024\n\nLa página se recargará automáticamente.');
+                
+                // Hide diagnostic info
+                const diagnosticInfo = document.getElementById('diagnosticInfo');
+                if (diagnosticInfo) {
+                    diagnosticInfo.classList.add('hidden');
+                }
+                
+                // Refresh the page to apply changes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+                
+            } catch (error) {
+                alert('❌ Error durante la reparación: ' + error.message);
+                console.error('Repair error:', error);
+            }
+        }
+        
+        function resetSystemEmergency() {
+            try {
+                if (!confirm('⚠️ ATENCIÓN: Esto eliminará TODOS los datos del sistema.\n¿Estás completamente seguro?\n\nEsta acción NO se puede deshacer.')) {
+                    return;
+                }
+                
+                if (!confirm('🚨 CONFIRMACIÓN FINAL:\n¿Realmente quieres eliminar todos los datos?\nEsto incluye transacciones, proveedores, pagos, etc.')) {
+                    return;
+                }
+                
+                // Complete system reset
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Clear any cookies related to the site
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                alert('🔥 RESET COMPLETO EJECUTADO\n\nEl sistema ha sido completamente reiniciado.\nLa página se recargará automáticamente.');
+                
+                // Force page reload
+                setTimeout(() => {
+                    window.location.href = window.location.href;
+                }, 1000);
+                
+            } catch (error) {
+                alert('❌ Error durante el reset: ' + error.message);
+                console.error('Reset error:', error);
+            }
+        }
+        
+        // Enhanced login validation with corruption detection
+        function validateLoginWithDiagnostics(username, password) {
+            try {
+                // Try to get users data
+                let usersData = localStorage.getItem('users');
+                
+                if (!usersData) {
+                    // No users data found, initialize
+                    console.warn('Users data not found, initializing...');
+                    initializeUsers();
+                    
+                    // Try again after initialization
+                    usersData = localStorage.getItem('users');
+                    if (!usersData) {
+                        throw new Error('Failed to initialize users data');
+                    }
+                }
+                
+                const users = JSON.parse(usersData);
+                
+                // Validate data structure
+                if (!Array.isArray(users)) {
+                    throw new Error('Users data is not an array');
+                }
+                
+                // Find user
+                const user = users.find(u => u.username === username);
+                
+                if (!user) {
+                    return { success: false, message: 'Usuario no encontrado. Verifica: admin / master2024' };
+                }
+                
+                if (user.password !== password) {
+                    return { success: false, message: 'Contraseña incorrecta. Verifica: admin / master2024' };
+                }
+                
+                return { success: true, user: user };
+                
+            } catch (error) {
+                console.error('Login validation error:', error);
+                return { 
+                    success: false, 
+                    message: 'Error de validación: ' + error.message + '\n\n🔧 Usa el botón "Reparar" para corregir problemas de datos.' 
+                };
+            }
+        }
+        
+        // Enhanced initialization with diagnostic capabilities
+        function initializeSystemWithDiagnostics() {
+            try {
+                // Check if this is first run or if there are issues
+                const usersData = localStorage.getItem('users');
+                
+                if (!usersData) {
+                    console.log('🔄 Primera ejecución detectada, inicializando sistema...');
+                    initializeUsers();
+                }
+                
+                // Test localStorage functionality
+                try {
+                    localStorage.setItem('healthCheck', Date.now().toString());
+                    localStorage.removeItem('healthCheck');
+                } catch (e) {
+                    console.error('❌ localStorage no está disponible:', e);
+                    alert('⚠️ Error crítico: El navegador no permite el uso de localStorage.\nEsto puede deberse a:\n- Modo incógnito/privado\n- Configuración de privacidad estricta\n- Problemas del navegador');
+                }
+                
+                console.log('✅ Sistema inicializado correctamente');
+                
+            } catch (error) {
+                console.error('❌ Error durante la inicialización:', error);
+            }
+        }
+        
+        // Override the original login form behavior
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize system with diagnostics
+            initializeSystemWithDiagnostics();
+            
+            // Override login form if it exists
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.onsubmit = function(e) {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    const errorDiv = document.getElementById('loginError');
+                    
+                    // Enhanced validation with diagnostics
+                    const result = validateLoginWithDiagnostics(username, password);
+                    
+                    if (result.success) {
+                        currentUser = result.user;
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        
+                        // Log successful login
+                        try {
+                            logAction('LOGIN', `User ${username} logged in successfully`);
+                        } catch (e) {
+                            console.warn('Could not log action:', e);
+                        }
+                        
+                        showMainApp();
+                    } else {
+                        if (errorDiv) {
+                            errorDiv.textContent = result.message;
+                            errorDiv.classList.remove('hidden');
+                        } else {
+                            alert(result.message);
+                        }
+                        
+                        // Show diagnostic info if there's a technical error
+                        if (result.message.includes('Error de validación')) {
+                            setTimeout(showDiagnostics, 500);
+                        }
+                    }
+                };
+            }
+            
+            // Add global keyboard shortcuts for diagnostics
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+Shift+D for diagnostics
+                if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                    e.preventDefault();
+                    showDiagnostics();
+                }
+                // Ctrl+Shift+R for repair
+                if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                    e.preventDefault();
+                    fixLocalStorageCorruption();
+                }
+            });
+        });
+
         // Console welcome message for developers
         console.log(`
         🏢 Sistema Financiero Mansión Plast C.A
-        📅 Versión: 2.0 Enhanced
+        📅 Versión: 2.0 Enhanced with Emergency Tools
         🚀 Funcionalidades implementadas:
            ✅ Sistema de abonos mejorado con conversión automática
            ✅ Reportes separados por moneda (USD/VES)
@@ -11460,6 +11795,11 @@
            ✅ Atajos de teclado
            ✅ Validaciones mejoradas
            ✅ Sistema de logs completo
+           🆕 Herramientas de diagnóstico y reparación
+        
+        🔧 Atajos de emergencia:
+           Ctrl+Shift+D: Mostrar diagnósticos
+           Ctrl+Shift+R: Reparar localStorage
         
         💡 Desarrollado por Dham 2025
         `);
